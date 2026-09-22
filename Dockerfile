@@ -10,10 +10,19 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM node:22-alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY --from=build /app/dist ./dist
+COPY server.js .
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENV PORT=80
+
+CMD ["npm", "start"]
